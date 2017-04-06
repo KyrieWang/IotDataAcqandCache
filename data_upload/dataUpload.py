@@ -26,3 +26,6 @@ def dataUpload():
     SaveDataThreadD(data_queneD, db_remote).start()
 
     print('upload data start!!!')
+
+if __name__ == '__main__':
+    dataUpload()

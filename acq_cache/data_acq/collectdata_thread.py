@@ -7,9 +7,11 @@ __author__ = 'WangNima'
 
 import time
 from threading import Thread
+
 import modbus_tk.modbus_tcp as modbus_tcp
-from data_acq.modbus import send_modbus
-from data_acq.modbus import ModbusResponseA, ModbusResponseD
+
+from .modbus import ModbusResponseA, ModbusResponseD
+from .modbus import send_modbus
 
 
 class CollectDataThread(Thread):

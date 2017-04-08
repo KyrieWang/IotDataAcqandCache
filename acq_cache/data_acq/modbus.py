@@ -14,16 +14,16 @@ import modbus_tk.defines as cst
 
 class ModbusRequest(object):
     def __init__(self, requestvar):
-        self.data_name = requestvar[0]
-        self.dev_addr = requestvar[1] #modbus server IP_address
-        self.data_unit = requestvar[2]
-        self.data_type = requestvar[3]
-        self.data_length = requestvar[4] #quality_of_x
-        self.data_addr = requestvar[5] #start_addr
-        self.dev_name = requestvar[6]
-        self.dev_port = requestvar[7]
-        self.dev_unit = requestvar[8] #slaveID
-        self.fun_code = requestvar[9] #funcode
+        self.data_name = requestvar[1]
+        self.dev_addr = requestvar[2] #modbus server IP_address
+        self.data_unit = requestvar[3]
+        self.data_type = requestvar[4]
+        self.data_length = requestvar[5] #quality_of_x
+        self.data_addr = requestvar[6] #start_addr
+        self.dev_name = requestvar[7]
+        self.dev_port = requestvar[8]
+        self.dev_unit = requestvar[9] #slaveID
+        self.fun_code = requestvar[10] #funcode
 
 Base = declarative_base()
 
@@ -92,7 +92,7 @@ funcode = {1: cst.READ_COILS, 2: cst.READ_DISCRETE_INPUTS,
 def send_modbus(modbus_req, master):
     logger = modbus_tk.utils.create_logger("console")
     try:
-        logger.info("connected")
+        #logger.info("connected")
 
         response = master.execute(modbus_req.dev_unit,
                                   funcode[modbus_req.fun_code],

@@ -15,6 +15,7 @@ def queryrequest(database):
         rs = con.execute('SELECT * FROM datasources')
         values = rs.fetchall()
         print(values)
+        return values
 
 if __name__ == '__main__':
     queryrequest()

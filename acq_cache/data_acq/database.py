@@ -6,7 +6,7 @@
 __author__ = 'WangNima'
 
 class DataBase(object):
-    def __init__(self, db_name, user, passwd, db_host='localhost', port=3306):
+    def __init__(self, db_name, user, passwd, db_host='localhost', port='3306'):
         self.__db_connect = ('mysql+mysqlconnector://' + user +
                              ':' + passwd + '@' + db_host +
                              ':' + port + '/' + db_name)

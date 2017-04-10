@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-'database info'
+"""
+upload datas from local to remote database
+"""
 
 __author__ = 'WangNima'
 
+import logging
 from queue import Queue
 from acq_cache.data_upload.historydata import Base
 from acq_cache.data_acq.database import DataBase
 from acq_cache.data_acq.savedata_thread import SaveDataThreadA, SaveDataThreadD
 from acq_cache.data_upload.cachedata_thread import CacheDataThreadA, CacheDataThreadD
 
+logging.basicConfig(level=logging.INFO)
 
 def dataUpload(db_name, user, passwd, db_host, port = 3306):
     """
@@ -32,7 +36,7 @@ def dataUpload(db_name, user, passwd, db_host, port = 3306):
     SaveDataThreadA(data_queneA, db_remote, Base).start()
     SaveDataThreadD(data_queneD, db_remote, Base).start()
 
-    print('upload data start!!!')
+    logging.info('upload data start!!!')
 
 if __name__ == '__main__':
     dataUpload('plcdaq', 'root', '123456','172.16.10.77')

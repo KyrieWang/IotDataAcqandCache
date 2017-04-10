@@ -6,6 +6,7 @@
 __author__ = 'WangNima'
 
 from sqlalchemy import create_engine
+from .database import DataBase
 
 def queryrequest(database):
     DB_CONNECT_STR = database.get_dbconnect()
@@ -18,4 +19,4 @@ def queryrequest(database):
         return values
 
 if __name__ == '__main__':
-    queryrequest()
+    queryrequest(DataBase('plcdaq', 'root', '123456'))

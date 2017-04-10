@@ -6,9 +6,12 @@
 __author__ = 'WangNima'
 
 import time
+import logging
 from threading import Thread
 from sqlalchemy import create_engine
 from .historydata import HistoryDataA, HistoryDataD
+
+logging.basicConfig(level=logging.INFO)
 
 class CacheDataThreadA(Thread):
     def __init__(self, queueA, database):
@@ -28,7 +31,7 @@ class CacheDataThreadA(Thread):
                     for item in datas:
                         self.queueA.put(HistoryDataA(item))
                     con.execute('DELETE FROM historydataA order by id ASC LIMIT 20')
-                    print('cache dataAAAAAAAAAAAAAA')
+                    logging.info('cache dataAAAAAAAAAAAAAA')
                 else:
                     time.sleep(5)
 
@@ -50,6 +53,6 @@ class CacheDataThreadD(Thread):
                     for item in datas:
                         self.queueD.put(HistoryDataD(item))
                     con.execute('DELETE FROM historydataD order by id ASC LIMIT 20')
-                    print('cache dataDDDDDDDDDDDDDDDD')
+                    logging.info('cache dataDDDDDDDDDDDDD')
                 else:
                     time.sleep(5)

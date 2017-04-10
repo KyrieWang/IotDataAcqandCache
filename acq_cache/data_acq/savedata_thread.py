@@ -5,9 +5,12 @@
 
 __author__ = 'WangNima'
 
+import logging
 from threading import Thread
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+logging.basicConfig(level=logging.INFO)
 
 class SaveDataThreadA(Thread):
     def __init__(self, queueA, database, base):
@@ -29,7 +32,7 @@ class SaveDataThreadA(Thread):
             dataA = self.queueA.get()
             self.queueA.task_done()
             session.add(dataA)
-            print('add dataA!!!!!!!')
+            logging.info('add dataA!!!!!!!')
             count += 1
             if count == 10:
                 session.commit()
@@ -55,7 +58,7 @@ class SaveDataThreadD(Thread):
             dataD = self.queueD.get()
             self.queueD.task_done()
             session.add(dataD)
-            print('add dataD!!!!!!!')
+            logging.info('add dataD!!!!!!!')
             count += 1
             if count == 10:
                 session.commit()

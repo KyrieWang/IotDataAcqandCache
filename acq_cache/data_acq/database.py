@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-'database info'
+"""Module docstring.
+
+database info
+"""
 
 __author__ = 'WangNima'
 

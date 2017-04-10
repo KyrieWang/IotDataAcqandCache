@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-'Thread:send modbus request and collect data from slave'
+"""Module docstring.
+
+Thread:sends modbus request and collect data from modbus server
+"""
 
 __author__ = 'WangNima'
 
-import time
 import logging
+import time
 from threading import Thread
+
 import modbus_tk.modbus_tcp as modbus_tcp
+
 from .modbus import ModbusResponseA, ModbusResponseD
 from .modbus import send_modbus
 
@@ -29,8 +34,8 @@ class CollectDataThread(Thread):
                 data = send_modbus(request, master)
                 if request.fun_code == 3 or request.fun_code == 4:
                     self.queueA.put(ModbusResponseA(request, data))
-                    logging.info('put into queueA')
+                    logging.debug('CollectDataThread: put into queueA')
                 else:
                     self.queueD.put(ModbusResponseD(request, data))
-                    logging.info('put into queueD')
+                    logging.debug('CollectDataThread: put into queueD')
             time.sleep(self.acfrequency)

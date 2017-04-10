@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-'modbus info'
+"""Module docstring.
+
+modbus info
+"""
 
 __author__ = 'WangNima'
 
-import time
 import struct
-from sqlalchemy import Column, String, Integer, Float
-from sqlalchemy.ext.declarative import declarative_base
+import time
+
 import modbus_tk
 import modbus_tk.defines as cst
+from sqlalchemy import Column, String, Integer, Float
+from sqlalchemy.ext.declarative import declarative_base
+
 
 class ModbusRequest(object):
     def __init__(self, requestvar):

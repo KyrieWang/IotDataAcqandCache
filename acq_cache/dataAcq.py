@@ -1,24 +1,28 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-'send modbus request and collect data from slave'
+"""Module docstring.
+
+Fetches modbus response data from industrial controllers and save it in local db
+"""
 
 __author__ = 'WangNima'
 
 import logging
 from queue import Queue
-from acq_cache.data_acq.queryrequest import queryrequest
-from acq_cache.data_acq.modbus import ModbusRequest
-from acq_cache.data_acq.savedata_thread import SaveDataThreadA, SaveDataThreadD
+
 from acq_cache.data_acq.collectdata_thread import CollectDataThread
 from acq_cache.data_acq.database import DataBase
 from acq_cache.data_acq.modbus import Base
+from acq_cache.data_acq.modbus import ModbusRequest
+from acq_cache.data_acq.queryrequest import queryrequest
+from acq_cache.data_acq.savedata_thread import SaveDataThreadA, SaveDataThreadD
 
 logging.basicConfig(level=logging.INFO)
 
 def dataAcq(acfrequency = 1):
     """
-    Fetches modbus response data from industrial controllers
+    Fetches modbus response data from industrial controllers and save it in local db
     :param acfrequency: frequency of data acquisition,default value is 1s
     :return: no
     """
@@ -37,7 +41,7 @@ def dataAcq(acfrequency = 1):
     CollectDataThread(response_queneA, response_queneD, request_list, acfrequency).start()
     SaveDataThreadA(response_queneA, db_local, Base).start()
     SaveDataThreadD(response_queneD, db_local, Base).start()
-    logging.info('acq data start!!!!!!!!!!!!!!!!!!!!!!')
+    logging.debug('acq data start!!!!!!!!!!!!!!!!!!!!!!')
 
 if __name__ == '__main__':
     dataAcq(5)

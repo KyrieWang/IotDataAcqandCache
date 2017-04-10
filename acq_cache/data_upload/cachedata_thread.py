@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-'upload data into dst database'
+"""Module docstring.
+
+upload data into dst database
+"""
 
 __author__ = 'WangNima'
 
-import time
 import logging
+import time
 from threading import Thread
+
 from sqlalchemy import create_engine
+
 from .historydata import HistoryDataA, HistoryDataD
 
 logging.basicConfig(level=logging.INFO)
@@ -28,11 +33,13 @@ class CacheDataThreadA(Thread):
                 rs = con.execute('SELECT * FROM historydataA LIMIT 20')
                 datas = rs.fetchall()
                 if datas:
+                    logging.debug('CacheDataThreadA: cache dataAAAAAAAAAAAAAA')
                     for item in datas:
                         self.queueA.put(HistoryDataA(item))
                     con.execute('DELETE FROM historydataA order by id ASC LIMIT 20')
-                    logging.info('cache dataAAAAAAAAAAAAAA')
                 else:
+                    con.execute('TRUNCATE TABLE historydataA')
+                    logging.debug('CacheDataThreadA: historydataA table is empty')
                     time.sleep(5)
 
 class CacheDataThreadD(Thread):
@@ -53,6 +60,8 @@ class CacheDataThreadD(Thread):
                     for item in datas:
                         self.queueD.put(HistoryDataD(item))
                     con.execute('DELETE FROM historydataD order by id ASC LIMIT 20')
-                    logging.info('cache dataDDDDDDDDDDDDD')
+                    logging.debug('CacheDataThreadD: cache dataDDDDDDDDDDDDD')
                 else:
+                    con.execute('TRUNCATE TABLE historydataD')
+                    logging.debug('CacheDataThreadD: historydataD table is empty')
                     time.sleep(5)

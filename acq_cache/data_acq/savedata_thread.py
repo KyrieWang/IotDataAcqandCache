@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-'modbusTcp request class'
+"""Module docstring.
+
+modbusTcp request class
+"""
 
 __author__ = 'WangNima'
 
 import logging
 from threading import Thread
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -32,11 +36,11 @@ class SaveDataThreadA(Thread):
             dataA = self.queueA.get()
             self.queueA.task_done()
             session.add(dataA)
-            logging.info('add dataA!!!!!!!')
             count += 1
             if count == 10:
                 session.commit()
                 count = 0
+                logging.debug('SaveDataThreadA: save dataA in local!!!!!!!')
 
 class SaveDataThreadD(Thread):
     def __init__(self, queueD, database, base):
@@ -58,8 +62,8 @@ class SaveDataThreadD(Thread):
             dataD = self.queueD.get()
             self.queueD.task_done()
             session.add(dataD)
-            logging.info('add dataD!!!!!!!')
             count += 1
             if count == 10:
                 session.commit()
                 count = 0
+                logging.debug('SaveDataThreadA: save dataD in local!!!!!!!')

@@ -114,6 +114,7 @@ def send_modbus(modbus_req, master):
 
     except modbus_tk.modbus.ModbusError as e:
         logger.error("%s- Code=%d" % (e, e.get_exception_code()))
+        raise
 
 
 def bytes16ToFloat(h1, h2):

@@ -26,12 +26,16 @@ class CollectDataThread(Thread):
         self.queueD = queueD
         self.modbusRequest_list = modbusRequest_list
         self.acfrequency = acfrequency
+        self.stop_flag = True
 
     def run(self):
         master = modbus_tcp.TcpMaster(host = self.modbusRequest_list[0].dev_addr)
-        while True:
+        while self.stop_flag:
             for request in self.modbusRequest_list:
-                data = send_modbus(request, master)
+                try:
+                    data = send_modbus(request, master)
+                except:
+                    break
                 if request.fun_code == 3 or request.fun_code == 4:
                     self.queueA.put(ModbusResponseA(request, data))
                     logging.debug('CollectDataThread: put into queueA')
@@ -39,3 +43,6 @@ class CollectDataThread(Thread):
                     self.queueD.put(ModbusResponseD(request, data))
                     logging.debug('CollectDataThread: put into queueD')
             time.sleep(self.acfrequency)
+
+    def stop(self):
+        self.stop_flag = False

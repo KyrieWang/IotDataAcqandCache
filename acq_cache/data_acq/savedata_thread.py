@@ -22,25 +22,36 @@ class SaveDataThreadA(Thread):
         self.queueA = queueA
         self.database = database
         self.base = base
+        self.stop_flag = True
 
     def run(self):
         DB_CONNECT_STR = self.database.get_dbconnect()
-        engine = create_engine(DB_CONNECT_STR)
-        DBSession = sessionmaker(bind=engine)
-        session = DBSession()
+        try:
+            engine = create_engine(DB_CONNECT_STR)
+            DBSession = sessionmaker(bind=engine)
+            session = DBSession()
 
-        self.base.metadata.create_all(engine)
+            self.base.metadata.create_all(engine)
+        except:
+            return
 
         count = 0
-        while True:
+        while self.stop_flag:
             dataA = self.queueA.get()
             self.queueA.task_done()
             session.add(dataA)
             count += 1
             if count == 10:
-                session.commit()
-                count = 0
-                logging.debug('SaveDataThreadA: save dataA in local!!!!!!!')
+                try:
+                    session.commit()
+                    count = 0
+                    logging.debug('SaveDataThreadA: save dataA in db!!!!!!!')
+                except:
+                    session.close()
+                    break
+
+    def stop(self):
+        self.stop_flag = False
 
 class SaveDataThreadD(Thread):
     def __init__(self, queueD, database, base):
@@ -51,11 +62,14 @@ class SaveDataThreadD(Thread):
 
     def run(self):
         DB_CONNECT_STR = self.database.get_dbconnect()
-        engine = create_engine(DB_CONNECT_STR)
-        DBSession = sessionmaker(bind=engine)
-        session = DBSession()
+        try:
+            engine = create_engine(DB_CONNECT_STR)
+            DBSession = sessionmaker(bind=engine)
+            session = DBSession()
 
-        self.base.metadata.create_all(engine)
+            self.base.metadata.create_all(engine)
+        except:
+            return
 
         count = 0
         while True:
@@ -64,6 +78,13 @@ class SaveDataThreadD(Thread):
             session.add(dataD)
             count += 1
             if count == 10:
-                session.commit()
-                count = 0
-                logging.debug('SaveDataThreadA: save dataD in local!!!!!!!')
+                try:
+                    session.commit()
+                    count = 0
+                    logging.debug('SaveDataThreadD: save dataD in db!!!!!!!')
+                except:
+                    session.close()
+                    break
+
+    def stop(self):
+        self.stop_flag = False

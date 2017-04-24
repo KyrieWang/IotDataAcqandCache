@@ -22,7 +22,8 @@ class SaveDataThreadA(Thread):
         self.queueA = queueA
         self.database = database
         self.base = base
-        self.stop_flag = True
+        self.stop_flag = False
+        self.run_flag = False
 
     def run(self):
         DB_CONNECT_STR = self.database.get_dbconnect()
@@ -36,22 +37,33 @@ class SaveDataThreadA(Thread):
             return
 
         count = 0
-        while self.stop_flag:
-            dataA = self.queueA.get()
-            self.queueA.task_done()
-            session.add(dataA)
-            count += 1
-            if count == 10:
-                try:
-                    session.commit()
-                    count = 0
-                    logging.debug('SaveDataThreadA: save dataA in db!!!!!!!')
-                except:
-                    session.close()
-                    break
+        while (True):
+            if (not self.stop_flag):
+                dataA = self.queueA.get()
+                self.queueA.task_done()
+                session.add(dataA)
+                self.run_flag = True
+                count += 1
+                if count == 10:
+                    try:
+                        session.commit()
+                        count = 0
+                        logging.debug('SaveDataThreadA: save dataA in db!!!!!!!')
+                    except:
+                        self.run_flag = False
+                        session.close()
+                        break
 
     def stop(self):
+        self.stop_flag = True
+        self.run_flag = False
+
+    def restart(self):
         self.stop_flag = False
+        self.run_flag = True
+
+    def run_status(self):
+        return self.run_flag
 
 class SaveDataThreadD(Thread):
     def __init__(self, queueD, database, base):
@@ -59,6 +71,8 @@ class SaveDataThreadD(Thread):
         self.queueD = queueD
         self.database = database
         self.base = base
+        self.stop_flag = False
+        self.run_flag = False
 
     def run(self):
         DB_CONNECT_STR = self.database.get_dbconnect()
@@ -72,10 +86,11 @@ class SaveDataThreadD(Thread):
             return
 
         count = 0
-        while True:
+        while (not self.stop_flag):
             dataD = self.queueD.get()
             self.queueD.task_done()
             session.add(dataD)
+            self.run_flag = True
             count += 1
             if count == 10:
                 try:
@@ -83,8 +98,17 @@ class SaveDataThreadD(Thread):
                     count = 0
                     logging.debug('SaveDataThreadD: save dataD in db!!!!!!!')
                 except:
+                    self.run_flag = False
                     session.close()
                     break
 
     def stop(self):
+        self.stop_flag = True
+        self.run_flag = False
+
+    def restart(self):
         self.stop_flag = False
+        self.run_flag = True
+
+    def run_status(self):
+        return self.run_flag

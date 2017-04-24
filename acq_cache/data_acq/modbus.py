@@ -13,12 +13,14 @@ import time
 
 import modbus_tk
 import modbus_tk.defines as cst
+import modbus_tk.modbus_tcp as modbus_tcp
 from sqlalchemy import Column, String, Integer, Float
 from sqlalchemy.ext.declarative import declarative_base
 
 
 class ModbusRequest(object):
     def __init__(self, requestvar):
+        self.var_id = requestvar[0]
         self.data_name = requestvar[1]
         self.dev_addr = requestvar[2] #modbus server IP_address
         self.data_unit = requestvar[3]
@@ -95,7 +97,7 @@ funcode = {1: cst.READ_COILS, 2: cst.READ_DISCRETE_INPUTS,
            3: cst.READ_HOLDING_REGISTERS, 4: cst.READ_INPUT_REGISTERS}
 
 def send_modbus(modbus_req, master):
-    logger = modbus_tk.utils.create_logger("console")
+    #logger = modbus_tk.utils.create_logger("console")
     try:
         #logger.info("connected")
 
@@ -103,18 +105,35 @@ def send_modbus(modbus_req, master):
                                   funcode[modbus_req.fun_code],
                                   modbus_req.data_addr,
                                   modbus_req.data_length)
-        print(response)
+        #print(response)
         if modbus_req.fun_code == 3 or modbus_req.fun_code == 4:
             data_value = bytes16ToFloat(response[0], response[1])
-            print(data_value)
+            #print(data_value)
             return data_value
         else:
-            print(response[0])
+            #print(response[0])
             return response[0]
 
     except modbus_tk.modbus.ModbusError as e:
-        logger.error("%s- Code=%d" % (e, e.get_exception_code()))
+        #logger.error("%s- Code=%d" % (e, e.get_exception_code()))
         raise
+
+def modbus_vars_check(modbus_req_list):
+    """
+    Check vars : if every var is correct
+    :param request_list: modbus request var list
+    :return: a list containing the IDs of illegal modbus requests
+    """
+    var_check = []
+    master = modbus_tcp.TcpMaster(host=modbus_req_list[0].dev_addr)
+    for modbus_req in modbus_req_list:
+        try:
+            master.execute(modbus_req.dev_unit,
+                           funcode[modbus_req.fun_code],
+                           modbus_req.data_addr, modbus_req.data_length)
+        except:
+            var_check.append(modbus_req.var_id)
+    return var_check
 
 
 def bytes16ToFloat(h1, h2):

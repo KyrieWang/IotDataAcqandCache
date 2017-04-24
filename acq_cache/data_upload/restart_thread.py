@@ -21,10 +21,10 @@ class RestartSava_thread(Thread):
         super(RestartSava_thread, self).__init__()
         self.initThreasName = initThreadsName
         self.threadInfo = threadInfo
-        self.stop_flag = True
+        self.stop_flag = False
 
     def run(self):
-        while self.stop_flag:
+        while not self.stop_flag:
             nowThreadsName = []
             nowthreads =  enumerate()
             for thread in nowthreads:
@@ -49,6 +49,9 @@ class RestartSava_thread(Thread):
             time.sleep(120)
 
     def stop(self):
+        self.stop_flag = True
+
+    def restart(self):
         self.stop_flag = False
 
 class RestartCollec_thread(Thread):
@@ -56,27 +59,31 @@ class RestartCollec_thread(Thread):
         super(RestartCollec_thread, self).__init__()
         self.initThreasName = initThreadsName
         self.threadInfo = threadInfo
-        self.stop_flag = True
+        self.stop_flag = False
 
     def run(self):
-        while self.stop_flag:
-            nowThreadsName = []
-            nowthreads =  enumerate()
-            for thread in nowthreads:
-                nowThreadsName.append(thread.getName())
+        while True:
+            if (not self.stop_flag):
+                nowThreadsName = []
+                nowthreads = enumerate()
+                for thread in nowthreads:
+                    nowThreadsName.append(thread.getName())
 
-            for threadname in self.initThreasName:
-                if threadname in nowThreadsName:
-                    pass
-                else:
-                    logging.debug('thread {0} is dead'.format(threadname))
-                    res_info = self.threadInfo[threadname]
-                    thread = CollectDataThread(res_info[0], res_info[1], res_info[2], res_info[3])
-                    thread.setName(threadname)
-                    thread.start()
-                    logging.debug('thread {0} restart'.format(threadname))
+                for threadname in self.initThreasName:
+                    if threadname in nowThreadsName:
+                        pass
+                    else:
+                        logging.debug('thread {0} is dead'.format(threadname))
+                        res_info = self.threadInfo[threadname]
+                        thread = CollectDataThread(res_info[0], res_info[1], res_info[2], res_info[3])
+                        thread.setName(threadname)
+                        thread.start()
+                        logging.debug('thread {0} restart'.format(threadname))
 
-            time.sleep(60)
+                time.sleep(60)
 
     def stop(self):
+        self.stop_flag = True
+
+    def restart(self):
         self.stop_flag = False

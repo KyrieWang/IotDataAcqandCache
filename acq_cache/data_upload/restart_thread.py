@@ -25,28 +25,32 @@ class RestartSava_thread(Thread):
 
     def run(self):
         while not self.stop_flag:
-            nowThreadsName = []
-            nowthreads =  enumerate()
-            for thread in nowthreads:
-                nowThreadsName.append(thread.getName())
+            if(not self.stop_flag):
+                nowThreadsName = []
+                nowthreads = enumerate()
+                for thread in nowthreads:
+                    nowThreadsName.append(thread.getName())
 
-            for threadname in self.initThreasName:
-                if threadname in nowThreadsName:
-                    pass
-                else:
-                    logging.debug('thread {0} is dead'.format(threadname))
-                    res_info = self.threadInfo[threadname]
-
-                    if threadname == 'Thread:savedataA_remote':
-                        thread = SaveDataThreadA(res_info[0], res_info[1], res_info[2])
+                for threadname in self.initThreasName:
+                    if threadname in nowThreadsName:
+                        pass
                     else:
-                        thread = SaveDataThreadD(res_info[0], res_info[1], res_info[2])
+                        logging.debug('thread {0} is dead'.format(threadname))
+                        res_info = self.threadInfo[threadname]
 
-                    thread.setName(threadname)
-                    thread.start()
-                    logging.debug('thread {0} restart'.format(threadname))
+                        if threadname == 'Thread:savedataA_remote':
+                            thread = SaveDataThreadA(res_info[0], res_info[1], res_info[2])
+                        else:
+                            thread = SaveDataThreadD(res_info[0], res_info[1], res_info[2])
 
-            time.sleep(120)
+                        thread.setName(threadname)
+                        thread.start()
+                        logging.debug('thread {0} restart'.format(threadname))
+
+                time.sleep(120)
+            else:
+                logging.debug('RestartSava_thread is over')
+                break
 
     def stop(self):
         self.stop_flag = True
@@ -81,6 +85,9 @@ class RestartCollec_thread(Thread):
                         logging.debug('thread {0} restart'.format(threadname))
 
                 time.sleep(60)
+            else:
+                logging.debug('RestartCollec_thread is over')
+                break
 
     def stop(self):
         self.stop_flag = True

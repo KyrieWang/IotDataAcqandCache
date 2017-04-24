@@ -37,7 +37,7 @@ class SaveDataThreadA(Thread):
             return
 
         count = 0
-        while (True):
+        while (not self.stop_flag):
             if (not self.stop_flag):
                 dataA = self.queueA.get()
                 self.queueA.task_done()
@@ -53,6 +53,11 @@ class SaveDataThreadA(Thread):
                         self.run_flag = False
                         session.close()
                         break
+            else:
+                self.run_flag = False
+                session.close()
+                logging.debug('SaveDataThreadA is over!!!!!!!')
+                break
 
     def stop(self):
         self.stop_flag = True
@@ -86,21 +91,27 @@ class SaveDataThreadD(Thread):
             return
 
         count = 0
-        while (not self.stop_flag):
-            dataD = self.queueD.get()
-            self.queueD.task_done()
-            session.add(dataD)
-            self.run_flag = True
-            count += 1
-            if count == 10:
-                try:
-                    session.commit()
-                    count = 0
-                    logging.debug('SaveDataThreadD: save dataD in db!!!!!!!')
-                except:
-                    self.run_flag = False
-                    session.close()
-                    break
+        while not self.stop_flag:
+            if(not self.stop_flag):
+                dataD = self.queueD.get()
+                self.queueD.task_done()
+                session.add(dataD)
+                self.run_flag = True
+                count += 1
+                if count == 10:
+                    try:
+                        session.commit()
+                        count = 0
+                        logging.debug('SaveDataThreadD: save dataD in db!!!!!!!')
+                    except:
+                        self.run_flag = False
+                        session.close()
+                        break
+            else:
+                self.run_flag = False
+                session.close()
+                logging.debug('SaveDataThreadD is over!!!!!!!')
+                break
 
     def stop(self):
         self.stop_flag = True

@@ -31,11 +31,12 @@ class CollectDataThread(Thread):
 
     def run(self):
         master = modbus_tcp.TcpMaster(host = self.modbusRequest_list[0].dev_addr)
-        while (True):
+        while (not self.stop_flag):
             for request in self.modbusRequest_list:
                 if (not self.stop_flag) :
                     try:
                         data = send_modbus(request, master)
+                        self.run_flag = True
                     except:
                         self.run_flag = False
                         break
@@ -45,7 +46,11 @@ class CollectDataThread(Thread):
                     else:
                         self.queueD.put(ModbusResponseD(request, data))
                         logging.debug('CollectDataThread: put into queueD')
-            self.run_flag = True
+                else:
+                    self.run_flag = False
+                    logging.debug('CollectDataThread is over')
+                    break
+            #self.run_flag = True
             time.sleep(self.acfrequency)
 
     def stop(self):

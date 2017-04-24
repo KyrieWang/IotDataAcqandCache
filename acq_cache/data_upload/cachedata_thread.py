@@ -30,7 +30,7 @@ class CacheDataThreadA(Thread):
         engine = create_engine(DB_CONNECT_STR)
 
         with engine.connect() as con:
-            while (True):
+            while (not self.stop_flag):
                 if (not self.stop_flag):
                     rs = con.execute('SELECT * FROM historydataA LIMIT 20')
                     datas = rs.fetchall()
@@ -43,6 +43,9 @@ class CacheDataThreadA(Thread):
                         con.execute('TRUNCATE TABLE historydataA')
                         logging.debug('CacheDataThreadA: historydataA table is empty')
                         time.sleep(5)
+                else:
+                    logging.debug('CacheDataThreadA is over')
+                    break
 
     def stop(self):
         self.stop_flag = True
@@ -62,7 +65,7 @@ class CacheDataThreadD(Thread):
         engine = create_engine(DB_CONNECT_STR)
 
         with engine.connect() as con:
-            while (True):
+            while (not self.stop_flag):
                 if (not self.stop_flag):
                     rs = con.execute('SELECT * FROM historydataD LIMIT 20')
                     datas = rs.fetchall()
@@ -75,6 +78,9 @@ class CacheDataThreadD(Thread):
                         con.execute('TRUNCATE TABLE historydataD')
                         logging.debug('CacheDataThreadD: historydataD table is empty')
                         time.sleep(5)
+                else:
+                    logging.debug('CacheDataThreadD is over')
+                    break
 
     def stop(self):
         self.stop_flag = True

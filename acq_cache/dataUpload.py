@@ -58,7 +58,7 @@ class DataUpload(object):
         :param port: port of ... , default port is 3306
         :return: no
         """
-        if ((not self.__start_flag) and (not self.__stop_flag)):
+        if (not self.__start_flag):
             db_local = DataBase('plcdaq', 'root', 'root')
             db_remote = DataBase(db_name, user, passwd, db_host, port)
             data_queneA = Queue(20)
@@ -84,16 +84,10 @@ class DataUpload(object):
             self.__sdd_remote.start()
             self.__thread_check.start()
             self.__start_flag = True
+            self.__stop_flag = False
 
             logging.debug('upload data start!!!')
-        elif (self.__start_flag and self.__stop_flag):
-            self.__cache_th_a.restart()
-            self.__cache_th_d.restart()
-            self.__sda_remote.restart()
-            self.__sdd_remote.restart()
-            self.__thread_check.restart()
-            self.__stop_flag = False
-            logging.debug('upload data Rstart!!!')
+
         else:
             pass
 
@@ -109,6 +103,7 @@ class DataUpload(object):
             self.__sdd_remote.stop()
             self.__thread_check.stop()
             self.__stop_flag = True
+            self.__start_flag = False
             logging.debug('upload data Rstart!!!')
 
     def upload_status(self):

@@ -37,9 +37,6 @@ class DataAcq(object):
         self.__save_th_d = None
         self.__acq_th = None
         self.__check_th = None
-        self.__req_vars = None
-        self.__request_list = []
-        self.__db_local = None
         self.__start_flag = False
         self.__stop_flag = False
 
@@ -60,31 +57,32 @@ class DataAcq(object):
         :return: A list containing the IDs of illegal modbus requests vars
                  If the list is empty, all modbus vars is correct and dataAcq is starting
         """
-        if ((not self.__start_flag) and (not self.__stop_flag)):
-            self.__db_local = DataBase('plcdaq', 'root', 'root')
-            self.__req_vars = queryrequest(self.__db_local)
+        start_check = []
+        if (not self.__start_flag):
+            db_local = DataBase('plcdaq', 'root', 'root')
+            req_vars = queryrequest(db_local)
+            request_list = []
             response_queneA = Queue(20)
             response_queneD = Queue(20)
 
-            for var in self.__req_vars:
-                self.__request_list.append(ModbusRequest(var))
+            for var in req_vars:
+                request_list.append(ModbusRequest(var))
 
-            var_check = modbus_vars_check(self.__request_list)
+            var_check = modbus_vars_check(request_list)
 
-            start_check = []
             if var_check:
-                start_check.append(False)
+                start_check = [False,var_check]
                 logging.debug('some modbus vars are wrong!!!')
             else:
-                start_check.append(True)
+                start_check = [True,var_check]
                 logging.debug('modbus vars are all right!!!')
                 initThreadsName = ['Thread:collectdata']
-                restart_info = {'Thread:collectdata': [response_queneA, response_queneD, self.__request_list, acfrequency]}
+                restart_info = {'Thread:collectdata': [response_queneA, response_queneD, request_list, acfrequency]}
 
-                self.__save_th_a = SaveDataThreadA(response_queneA, self.__db_local, Base)
-                self.__save_th_d = SaveDataThreadD(response_queneD, self.__db_local, Base)
+                self.__save_th_a = SaveDataThreadA(response_queneA, db_local, Base)
+                self.__save_th_d = SaveDataThreadD(response_queneD, db_local, Base)
 
-                self.__acq_th = CollectDataThread(response_queneA, response_queneD, self.__request_list, acfrequency)
+                self.__acq_th = CollectDataThread(response_queneA, response_queneD, request_list, acfrequency)
                 self.__acq_th.setName(initThreadsName[0])
 
                 self.__check_th = RestartCollec_thread(initThreadsName, restart_info)
@@ -95,36 +93,14 @@ class DataAcq(object):
                 self.__acq_th.start()
                 self.__check_th.start()
                 self.__start_flag = True
+                self.__stop_flag = False
                 logging.debug('acq data start!!!')
-            start_check.append(var_check)
-            return start_check
-
-        elif (self.__start_flag and self.__stop_flag) :
-            for var in queryrequest(self.__db_local):
-                if var in self.__req_vars:
-                    pass
-                else:self.__request_list.append(ModbusRequest(var))
-
-            var_check = modbus_vars_check(self.__request_list)
-            start_check = []
-            if var_check:
-                start_check.append(False)
-            else:
-                start_check.append(True)
-
-            self.__save_th_a.restart()
-            self.__save_th_d.restart()
-            self.__acq_th.restart()
-            self.__check_th.restart()
-            self.__stop_flag = False
-            start_check.append(True)
-            logging.debug('Restart daq!!!')
-
-            start_check.append(var_check)
-            return start_check
 
         else:
-            pass
+            empty = []
+            start_check = [True,empty]
+
+        return start_check
 
     def acq_stop(self):
         """
@@ -137,6 +113,7 @@ class DataAcq(object):
             self.__acq_th.stop()
             self.__check_th.stop()
             self.__stop_flag = True
+            self.__start_flag = False
             logging.debug('acq data stop!!!')
 
     def acq_status(self):
@@ -144,7 +121,7 @@ class DataAcq(object):
         Check if data-acq is running correctly
         :return: Bool, you know
         """
-        if self.__start_flag :
+        if (self.__start_flag):
             s1 = self.__acq_th.run_status()
             s2 = self.__save_th_d.run_status()
             s3 = self.__save_th_a.run_status()

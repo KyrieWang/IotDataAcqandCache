@@ -34,6 +34,7 @@ class SaveDataThreadA(Thread):
 
             self.base.metadata.create_all(engine)
         except:
+            self.run_flag = False
             return
 
         count = 0
@@ -42,11 +43,12 @@ class SaveDataThreadA(Thread):
                 dataA = self.queueA.get()
                 self.queueA.task_done()
                 session.add(dataA)
-                self.run_flag = True
                 count += 1
                 if count == 10:
                     try:
+                        self.run_flag = False
                         session.commit()
+                        self.run_flag = True
                         count = 0
                         logging.debug('SaveDataThreadA: save dataA in db!!!!!!!')
                     except:
@@ -88,6 +90,7 @@ class SaveDataThreadD(Thread):
 
             self.base.metadata.create_all(engine)
         except:
+            self.run_flag = False
             return
 
         count = 0
@@ -96,11 +99,12 @@ class SaveDataThreadD(Thread):
                 dataD = self.queueD.get()
                 self.queueD.task_done()
                 session.add(dataD)
-                self.run_flag = True
                 count += 1
                 if count == 10:
                     try:
+                        self.run_flag = False
                         session.commit()
+                        self.run_flag = True
                         count = 0
                         logging.debug('SaveDataThreadD: save dataD in db!!!!!!!')
                     except:

@@ -112,7 +112,7 @@ class DataUpload(object):
         :return: Bool, you know
         """
         if self.__start_flag :
-            return (self.__sda_remote.run_status() and self.__sdd_remote.run_status())
+            return (self.__sda_remote.run_status() or self.__sdd_remote.run_status())
         else:
             return False
 
